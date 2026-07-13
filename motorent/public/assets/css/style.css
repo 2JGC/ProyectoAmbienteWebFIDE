@@ -1,0 +1,42 @@
+/* ==========================================================
+   MotoRent Costa Rica - Estilos personalizados
+   ========================================================== */
+
+:root {
+    --moto-dark: #1a1a1a;
+    --moto-amber: #ffb703;
+}
+
+body {
+    font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+.hero-section {
+    min-height: 60vh;
+    background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
+        url('https://images.unsplash.com/photo-1558980664-10ea1d38e2f4?q=80&w=1600') center/cover no-repeat;
+}
+
+.card-img-top {
+    background-color: #eee;
+}
+
+.admin-sidebar {
+    width: 240px;
+    min-width: 240px;
+}
+
+.admin-sidebar .nav-link:hover,
+.admin-sidebar .nav-link.active {
+    background-color: var(--moto-amber);
+    color: #1a1a1a !important;
+    border-radius: 6px;
+}
+
+.navbar-brand span {
+    letter-spacing: 1px;
+}
+
+footer a {
+    color: #ffc107;
+}
