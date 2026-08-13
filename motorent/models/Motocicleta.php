@@ -15,17 +15,31 @@ class Motocicleta
         $this->db = Database::getConnection();
     }
 
-    /** Devuelve todas las motocicletas, con filtro opcional de categoría/búsqueda. */
-    public function listarTodas(?string $categoria = null, ?string $busqueda = null): array
+    /**
+     * Devuelve motocicletas, con filtro opcional de categoría/búsqueda.
+     * $soloDisponibles restringe el resultado a estado = 'disponible' (catálogo público).
+     */
+    public function listarTodas(?string $categoria = null, ?string $busqueda = null, bool $soloDisponibles = false): array
     {
+        // "WHERE 1 = 1" es un truco para poder ir agregando "AND ..." más
+        // abajo sin tener que preocuparnos de si es el primer filtro o no.
         $sql = 'SELECT * FROM motocicletas WHERE 1 = 1';
         $params = [];
 
+        // El catálogo público llama a este método con $soloDisponibles = true
+        // para no mostrarle al cliente motos que están reservadas o en
+        // mantenimiento. El panel de administración lo llama sin este
+        // filtro porque el admin sí necesita ver todo el inventario.
+        if ($soloDisponibles) {
+            $sql .= " AND estado = 'disponible'";
+        }
         if (!empty($categoria)) {
             $sql .= ' AND categoria = :categoria';
             $params[':categoria'] = $categoria;
         }
         if (!empty($busqueda)) {
+            // LIKE con % a los lados busca la palabra en cualquier parte
+            // del texto (por ejemplo "gix" encuentra "Gixxer 250").
             $sql .= ' AND (marca LIKE :busqueda OR modelo LIKE :busqueda)';
             $params[':busqueda'] = '%' . $busqueda . '%';
         }
@@ -39,6 +53,8 @@ class Motocicleta
     /** Devuelve solo las motocicletas disponibles (para catálogo público). */
     public function listarDisponibles(): array
     {
+        // Método más simple usado en la página de inicio, donde solo
+        // necesitamos "las disponibles" sin filtros de categoría o búsqueda.
         $stmt = $this->db->query("SELECT * FROM motocicletas WHERE estado = 'disponible' ORDER BY fecha_creacion DESC");
         return $stmt->fetchAll();
     }
@@ -63,6 +79,8 @@ class Motocicleta
             ':categoria'   => $datos['categoria'],
             ':precio_dia'  => $datos['precio_dia'],
             ':descripcion' => $datos['descripcion'] ?? null,
+            // Si el admin todavía no sube una foto, usamos una imagen
+            // genérica para que la tarjeta de la moto no se vea rota.
             ':imagen'      => $datos['imagen'] ?? 'default-moto.jpg',
             ':placa'       => $datos['placa'],
             ':estado'      => $datos['estado'] ?? 'disponible',
@@ -71,6 +89,9 @@ class Motocicleta
 
     public function actualizar(int $id, array $datos): bool
     {
+        // Nota: este método no toca la columna "imagen" a propósito.
+        // Cambiar la foto se hace aparte con actualizarImagen(), porque
+        // solo se sube una imagen nueva si el admin selecciona un archivo.
         $sql = 'UPDATE motocicletas SET marca = :marca, modelo = :modelo, anio = :anio,
                 cilindraje = :cilindraje, categoria = :categoria, precio_dia = :precio_dia,
                 descripcion = :descripcion, placa = :placa, estado = :estado

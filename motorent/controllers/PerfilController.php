@@ -27,6 +27,9 @@ class PerfilController
             if (!csrf_verify()) {
                 $errores[] = 'Token de seguridad inválido. Intente de nuevo.';
             } else {
+                // El perfil tiene tres formularios distintos en la misma
+                // página (datos, contraseña, foto), y todos apuntan aquí.
+                // Este campo "accion" nos dice cuál de los tres se envió.
                 $accion = $_POST['accion'] ?? '';
 
                 if ($accion === 'datos') {
@@ -37,6 +40,9 @@ class PerfilController
                     $this->actualizarFoto($errores);
                 }
 
+                // Volvemos a cargar los datos del usuario por si algo
+                // cambió (por ejemplo, el nombre), así la vista siempre
+                // muestra la información más reciente.
                 $usuario = $this->usuarioModel->buscarPorId((int) $_SESSION['usuario_id']);
             }
         }
@@ -59,6 +65,9 @@ class PerfilController
         $this->usuarioModel->actualizarPerfil((int) $_SESSION['usuario_id'], [
             'nombre' => $nombre, 'apellidos' => $apellidos, 'telefono' => $telefono, 'cedula' => $cedula,
         ]);
+        // Como el nombre se muestra en el menú superior (guardado en
+        // sesión al hacer login), lo actualizamos ahí también para que
+        // se refleje sin tener que volver a iniciar sesión.
         $_SESSION['usuario_nombre'] = $nombre;
         flash_success('Datos de perfil actualizados.');
         redirect('/perfil');
@@ -70,6 +79,9 @@ class PerfilController
         $nueva     = $_POST['password_nueva'] ?? '';
         $confirmar = $_POST['password_confirmar'] ?? '';
 
+        // Pedimos la contraseña actual antes de permitir el cambio, para
+        // que alguien que deje la sesión abierta en una computadora
+        // compartida no pueda cambiarle la contraseña a otra persona.
         if (!password_verify($actual, $usuario['password'])) {
             $errores[] = 'La contraseña actual no es correcta.';
             return;
@@ -95,6 +107,9 @@ class PerfilController
             return;
         }
 
+        // Solo aceptamos formatos de imagen conocidos y le ponemos un
+        // límite de tamaño, para evitar que alguien suba un archivo
+        // enorme o de un tipo que no podemos mostrar en el navegador.
         $permitidas = ['image/jpeg', 'image/png', 'image/webp'];
         $tipo = mime_content_type($_FILES['foto']['tmp_name']);
 
@@ -107,16 +122,15 @@ class PerfilController
             return;
         }
 
+        // Armamos un nombre de archivo único (usuario + timestamp) para
+        // que dos usuarios subiendo "foto.jpg" al mismo tiempo no se
+        // pisen entre sí en Firebase Storage.
         $extension = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
         $nombreArchivo = 'perfil_' . $_SESSION['usuario_id'] . '_' . time() . '.' . $extension;
-        $destino = BASE_PATH . '/public/uploads/perfiles/' . $nombreArchivo;
+        $url = FirebaseStorage::subir($_FILES['foto']['tmp_name'], 'perfiles', $nombreArchivo, $tipo);
 
-        if (!is_dir(dirname($destino))) {
-            mkdir(dirname($destino), 0755, true);
-        }
-
-        if (move_uploaded_file($_FILES['foto']['tmp_name'], $destino)) {
-            $this->usuarioModel->actualizarFoto((int) $_SESSION['usuario_id'], $nombreArchivo);
+        if ($url !== null) {
+            $this->usuarioModel->actualizarFoto((int) $_SESSION['usuario_id'], $url);
             flash_success('Foto de perfil actualizada.');
             redirect('/perfil');
         }

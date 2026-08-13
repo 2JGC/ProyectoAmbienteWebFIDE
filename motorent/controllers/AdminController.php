@@ -18,6 +18,9 @@ class AdminController
 
     public function __construct()
     {
+        // Esta línea protege TODO el panel: se ejecuta antes de cualquier
+        // método de este controlador, así que ninguna acción de admin se
+        // puede usar sin haber iniciado sesión como administrador.
         requiere_admin();
         $this->usuarioModel     = new Usuario();
         $this->motoModel        = new Motocicleta();
@@ -28,6 +31,9 @@ class AdminController
 
     public function dashboard(): void
     {
+        // Todas las tarjetas de resumen que ve el admin al entrar al
+        // panel salen de aquí: cuántos usuarios hay, cuántas motos,
+        // cuántas reservas pendientes, cuánto se ha ingresado, etc.
         $stats = [
             'total_usuarios'     => $this->usuarioModel->contarTotal(),
             'total_motos'        => $this->motoModel->contarTotal(),
@@ -45,6 +51,9 @@ class AdminController
 
     public function motos(): void
     {
+        // $accion viene por GET y decide qué mostrar (listado o
+        // formulario de edición); $post (más abajo) viene por POST y
+        // decide qué acción ejecutar (crear, editar o eliminar).
         $accion = $_GET['accion'] ?? 'listar';
         $errores = [];
 
@@ -52,6 +61,9 @@ class AdminController
             $post = $_POST['accion'] ?? '';
 
             if ($post === 'crear' || $post === 'editar') {
+                // Armamos un solo array de datos porque crear() y
+                // actualizar() esperan la misma estructura; así no
+                // repetimos el código de armar el array dos veces.
                 $datos = [
                     'marca'       => trim($_POST['marca'] ?? ''),
                     'modelo'      => trim($_POST['modelo'] ?? ''),
@@ -76,6 +88,8 @@ class AdminController
                     $id = (int) ($_POST['id_moto'] ?? 0);
                     $this->motoModel->actualizar($id, $datos);
 
+                    // La imagen se sube solo si el admin seleccionó un
+                    // archivo nuevo; si no, se conserva la que ya tenía.
                     if (!empty($_FILES['imagen']['name'])) {
                         $this->subirImagenMoto($id, $errores);
                     }
@@ -89,6 +103,8 @@ class AdminController
             }
         }
 
+        // Si venimos a editar una moto (?accion=editar&id=5), cargamos
+        // sus datos actuales para precargar el formulario.
         $motoEditar = null;
         if ($accion === 'editar' && isset($_GET['id'])) {
             $motoEditar = $this->motoModel->buscarPorId((int) $_GET['id']);
@@ -109,14 +125,16 @@ class AdminController
         }
 
         $extension = pathinfo($_FILES['imagen']['name'], PATHINFO_EXTENSION);
+        // Incluimos el id de la moto y un timestamp en el nombre del
+        // archivo para que quede claro a qué moto pertenece y no se
+        // repita con otra imagen subida antes.
         $nombreArchivo = 'moto_' . $idMoto . '_' . time() . '.' . $extension;
-        $destino = BASE_PATH . '/public/uploads/motos/' . $nombreArchivo;
+        $url = FirebaseStorage::subir($_FILES['imagen']['tmp_name'], 'motos', $nombreArchivo, $tipo);
 
-        if (!is_dir(dirname($destino))) {
-            mkdir(dirname($destino), 0755, true);
-        }
-        if (move_uploaded_file($_FILES['imagen']['tmp_name'], $destino)) {
-            $this->motoModel->actualizarImagen($idMoto, $nombreArchivo);
+        if ($url !== null) {
+            $this->motoModel->actualizarImagen($idMoto, $url);
+        } else {
+            $errores[] = 'No fue posible subir la imagen.';
         }
     }
 
@@ -127,6 +145,9 @@ class AdminController
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && csrf_verify()) {
             $id     = (int) ($_POST['id_reserva'] ?? 0);
             $estado = $_POST['estado'] ?? '';
+            // Solo aceptamos uno de estos 5 estados exactos, para que
+            // nadie pueda mandar un valor inventado por POST y dejar la
+            // reserva en un estado que no existe en la base de datos.
             $validos = ['pendiente', 'confirmada', 'en_curso', 'finalizada', 'cancelada'];
 
             if (in_array($estado, $validos, true)) {
@@ -155,6 +176,9 @@ class AdminController
                 $this->usuarioModel->cambiarRol($id, $_POST['rol'] ?? 'cliente');
                 flash_success('Rol del usuario actualizado.');
             } elseif ($accion === 'eliminar') {
+                // Evitamos que un administrador se elimine a sí mismo por
+                // error (o con mala intención) y se quede sin poder
+                // volver a entrar al panel.
                 if ($id !== (int) $_SESSION['usuario_id']) {
                     $this->usuarioModel->eliminar($id);
                     flash_success('Usuario eliminado.');
@@ -198,6 +222,8 @@ class AdminController
             $accion = $_POST['accion'] ?? '';
             $id = (int) ($_POST['id_publicacion'] ?? 0);
 
+            // Aquí es donde el admin modera lo que suben los usuarios a
+            // la galería comunitaria: aprobar, rechazar o eliminar.
             if ($accion === 'aprobar') {
                 $this->publicacionModel->cambiarEstado($id, 'aprobada');
                 flash_success('Publicación aprobada.');

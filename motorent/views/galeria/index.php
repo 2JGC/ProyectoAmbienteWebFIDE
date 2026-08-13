@@ -23,9 +23,14 @@
         <?php foreach ($publicaciones as $pub): ?>
             <div class="col-md-4">
                 <div class="card h-100 shadow-sm">
-                    <img src="<?= BASE_URL ?>/uploads/galeria/<?= e($pub['imagen']) ?>" class="card-img-top" style="height:220px;object-fit:cover;">
+                    <img src="<?= e($pub['imagen']) ?>" class="card-img-top" style="height:220px;object-fit:cover;">
                     <div class="card-body">
                         <h5 class="card-title"><?= e($pub['titulo']) ?></h5>
+                        <p class="card-text mb-1">
+                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                                <i class="bi <?= $i <= (int) $pub['calificacion'] ? 'bi-star-fill text-warning' : 'bi-star text-muted' ?>"></i>
+                            <?php endfor; ?>
+                        </p>
                         <p class="card-text small text-muted"><?= nl2br(e($pub['descripcion'] ?? '')) ?></p>
                         <p class="card-text small">Por <?= e($pub['nombre']) ?> <?= e($pub['apellidos']) ?></p>
                     </div>
@@ -52,6 +57,16 @@
                 <div class="mb-3">
                     <label class="form-label">Descripción</label>
                     <textarea name="descripcion" class="form-control" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Calificación de tu experiencia</label>
+                    <select name="calificacion" class="form-select" required>
+                        <option value="5" selected>★★★★★ (5 - Excelente)</option>
+                        <option value="4">★★★★☆ (4 - Muy buena)</option>
+                        <option value="3">★★★☆☆ (3 - Buena)</option>
+                        <option value="2">★★☆☆☆ (2 - Regular)</option>
+                        <option value="1">★☆☆☆☆ (1 - Mala)</option>
+                    </select>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Imagen</label>

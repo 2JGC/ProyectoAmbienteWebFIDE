@@ -19,7 +19,7 @@ CREATE TABLE usuarios (
     cedula          VARCHAR(20)  NULL,
     rol             ENUM('cliente','administrador') NOT NULL DEFAULT 'cliente',
     estado          ENUM('activo','inactivo') NOT NULL DEFAULT 'activo',
-    foto_perfil     VARCHAR(255) NULL,
+    foto_perfil     VARCHAR(500) NULL,
     fecha_registro  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
@@ -35,7 +35,7 @@ CREATE TABLE motocicletas (
     categoria       VARCHAR(50)  NOT NULL,   -- Scooter, Naked, Enduro, etc.
     precio_dia      DECIMAL(10,2) NOT NULL,
     descripcion     TEXT NULL,
-    imagen          VARCHAR(255) NULL,
+    imagen          VARCHAR(500) NULL,
     placa           VARCHAR(20)  NOT NULL UNIQUE,
     estado          ENUM('disponible','reservada','mantenimiento') NOT NULL DEFAULT 'disponible',
     fecha_creacion  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -66,10 +66,12 @@ CREATE TABLE publicaciones (
     id_usuario      INT NOT NULL,
     titulo          VARCHAR(150) NOT NULL,
     descripcion     TEXT NULL,
-    imagen          VARCHAR(255) NOT NULL,
+    imagen          VARCHAR(500) NOT NULL,
+    calificacion    TINYINT UNSIGNED NOT NULL DEFAULT 5,
     estado          ENUM('pendiente','aprobada','rechazada') NOT NULL DEFAULT 'pendiente',
     fecha_creacion  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_publicacion_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE
+    CONSTRAINT fk_publicacion_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
+    CONSTRAINT chk_publicacion_calificacion CHECK (calificacion BETWEEN 1 AND 5)
 ) ENGINE=InnoDB;
 
 
@@ -103,7 +105,7 @@ CREATE TABLE password_resets (
 
 INSERT INTO usuarios (nombre, apellidos, email, password, rol, estado)
 VALUES ('Administrador', 'MotoRent', 'admin@motorent.cr',
-'$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'administrador', 'activo');
+'$2y$10$LeIP4swX6RmD356WJFMMPerTRCMH6dMP1ZjrOExuY//XgGX96s.rS', 'administrador', 'activo');
 -- NOTA: el hash de ejemplo corresponde a "Admin123*"
 
 
@@ -113,3 +115,9 @@ INSERT INTO motocicletas (marca, modelo, anio, cilindraje, categoria, precio_dia
 ('Yamaha', 'XTZ 125', 2023, 125, 'Enduro', 18000.00, 'Ideal para caminos de lastre y ciudad.', 'default-moto.jpg', 'MOT-001', 'disponible'),
 ('Honda', 'CB 190R', 2022, 184, 'Naked', 20000.00, 'Ágil y económica, perfecta para la ciudad.', 'default-moto.jpg', 'MOT-002', 'disponible'),
 ('Suzuki', 'Gixxer 250', 2023, 249, 'Deportiva', 25000.00, 'Buen equilibrio entre potencia y manejo.', 'default-moto.jpg', 'MOT-003', 'disponible');
+
+
+-- Migración para bases de datos creadas ANTES de agregar la calificación por
+-- estrellas a la galería. Si la tabla `publicaciones` ya existe sin esta
+-- columna, ejecutar únicamente la siguiente línea en phpMyAdmin:
+-- ALTER TABLE publicaciones ADD COLUMN calificacion TINYINT UNSIGNED NOT NULL DEFAULT 5 AFTER imagen;

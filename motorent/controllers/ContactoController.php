@@ -36,6 +36,9 @@ class ContactoController
                 }
 
                 if (empty($errores)) {
+                    // No se envía ningún correo aquí: el mensaje solo
+                    // queda guardado en la base de datos, y el admin lo
+                    // revisa desde /admin/mensajes.
                     $this->contactoModel->crear([
                         'nombre' => $nombre, 'email' => $email, 'asunto' => $asunto, 'mensaje' => $mensaje,
                     ]);

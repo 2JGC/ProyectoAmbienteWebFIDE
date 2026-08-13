@@ -11,7 +11,7 @@
 
     <div class="row g-4">
         <div class="col-md-4 text-center">
-            <img src="<?= BASE_URL ?>/uploads/perfiles/<?= e($usuario['foto_perfil'] ?? '') ?>"
+            <img src="<?= e($usuario['foto_perfil'] ?? '') ?>"
                  onerror="this.src='<?= BASE_URL ?>/assets/img/default-avatar.png'"
                  class="rounded-circle mb-3 border" style="width:160px;height:160px;object-fit:cover;">
             <form method="post" enctype="multipart/form-data" action="<?= BASE_URL ?>/perfil">

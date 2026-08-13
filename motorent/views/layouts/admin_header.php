@@ -14,7 +14,7 @@
     <!-- Sidebar -->
     <nav class="admin-sidebar bg-dark text-white p-3 vh-100 position-sticky top-0">
         <a href="<?= BASE_URL ?>/admin/dashboard" class="d-flex align-items-center mb-4 text-white text-decoration-none">
-            <i class="bi bi-scooter fs-4 me-2"></i> <span class="fs-5 fw-bold">MotoRent Admin</span>
+             <span class="fs-5 fw-bold">MotoRent Admin</span>
         </a>
         <ul class="nav nav-pills flex-column gap-1">
             <li class="nav-item"><a class="nav-link text-white" href="<?= BASE_URL ?>/admin/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>

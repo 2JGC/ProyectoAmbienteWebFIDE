@@ -1,0 +1,9 @@
+# Credenciales reales: nunca deben subirse al repositorio.
+# Cada quien crea su propia copia local a partir de los .example de al lado.
+motorent/config/mail.php
+motorent/config/firebase-credentials.json
+
+# Basura típica del sistema operativo / editor
+.DS_Store
+Thumbs.db
+.vscode/

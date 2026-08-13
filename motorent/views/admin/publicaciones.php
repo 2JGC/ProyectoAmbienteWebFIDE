@@ -6,7 +6,7 @@
     <?php foreach ($publicaciones as $p): ?>
         <div class="col-md-4">
             <div class="card shadow-sm">
-                <img src="<?= BASE_URL ?>/uploads/galeria/<?= e($p['imagen']) ?>" class="card-img-top" style="height:180px;object-fit:cover;">
+                <img src="<?= e($p['imagen']) ?>" class="card-img-top" style="height:180px;object-fit:cover;">
                 <div class="card-body">
                     <h6 class="card-title"><?= e($p['titulo']) ?></h6>
                     <p class="small text-muted mb-1">Por <?= e($p['nombre']) ?> <?= e($p['apellidos']) ?></p>

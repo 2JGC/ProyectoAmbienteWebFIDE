@@ -19,7 +19,7 @@
         <?php foreach ($destacadas as $moto): ?>
             <div class="col-md-4">
                 <div class="card h-100 shadow-sm">
-                    <img src="<?= BASE_URL ?>/uploads/motos/<?= e($moto['imagen']) ?>"
+                    <img src="<?= e($moto['imagen']) ?>"
                          onerror="this.src='<?= BASE_URL ?>/assets/img/default-moto.jpg'"
                          class="card-img-top" alt="<?= e($moto['marca'] . ' ' . $moto['modelo']) ?>" style="height:200px;object-fit:cover;">
                     <div class="card-body">

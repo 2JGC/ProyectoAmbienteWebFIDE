@@ -3,7 +3,7 @@
 <div class="container py-5">
     <div class="row g-4">
         <div class="col-md-6">
-            <img src="<?= BASE_URL ?>/uploads/motos/<?= e($moto['imagen']) ?>"
+            <img src="<?= e($moto['imagen']) ?>"
                  onerror="this.src='<?= BASE_URL ?>/assets/img/default-moto.jpg'"
                  class="img-fluid rounded shadow-sm" alt="<?= e($moto['marca']) ?>">
         </div>

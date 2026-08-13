@@ -17,6 +17,9 @@ class Contacto
 
     public function crear(array $datos): bool
     {
+        // Guarda un mensaje nuevo que llega desde el formulario público
+        // de contacto. Empieza como "no leído" por defecto (columna
+        // `leido` en la tabla, con valor 0).
         $sql = 'INSERT INTO contactos (nombre, email, asunto, mensaje)
                 VALUES (:nombre, :email, :asunto, :mensaje)';
         $stmt = $this->db->prepare($sql);
@@ -30,6 +33,7 @@ class Contacto
 
     public function listarTodos(): array
     {
+        // Usado por el admin para ver la bandeja de mensajes de contacto.
         $stmt = $this->db->query('SELECT * FROM contactos ORDER BY fecha_envio DESC');
         return $stmt->fetchAll();
     }
@@ -55,6 +59,8 @@ class Contacto
 
     public function contarNoLeidos(): int
     {
+        // Este número es el que se muestra como aviso en el dashboard
+        // del admin, para que sepa si tiene mensajes sin revisar.
         return (int) $this->db->query('SELECT COUNT(*) FROM contactos WHERE leido = 0')->fetchColumn();
     }
 }

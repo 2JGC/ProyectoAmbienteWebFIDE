@@ -14,7 +14,7 @@ body {
 .hero-section {
     min-height: 60vh;
     background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
-        url('https://images.unsplash.com/photo-1558980664-10ea1d38e2f4?q=80&w=1600') center/cover no-repeat;
+        url('/motorent/public/assets/img/hero-moto.jpeg') center/cover no-repeat;
 }
 
 .card-img-top {
@@ -39,4 +39,27 @@ body {
 
 footer a {
     color: #ffc107;
+}
+
+/* ==========================================================
+   Calendarios de fecha de inicio/fin (Flatpickr) - vista de reservar
+   Son dos campos separados, pero ambos calendarios pintan en ámbar
+   claro todo el rango elegido (día de inicio, día de fin y los días
+   intermedios), gracias a la clase .rango-seleccionado que agrega
+   el JavaScript de la vista.
+   ========================================================== */
+.flatpickr-day.rango-seleccionado {
+    background: #ffe8a8;
+    border-color: #ffe8a8;
+    color: #1a1a1a;
+}
+
+/* El día exacto que se hizo clic en CADA calendario se ve en ámbar fuerte,
+   un poco más oscuro que el resto del rango para distinguirlo. */
+.flatpickr-day.selected,
+.flatpickr-day.selected:hover,
+.flatpickr-day.selected.rango-seleccionado {
+    background: var(--moto-amber);
+    border-color: var(--moto-amber);
+    color: #1a1a1a;
 }

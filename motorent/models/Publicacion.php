@@ -18,6 +18,9 @@ class Publicacion
     /** Publicaciones aprobadas, visibles en la galería pública. */
     public function listarAprobadas(): array
     {
+        // Solo mostramos al público las publicaciones que un admin ya
+        // revisó y aprobó; así evitamos que cualquiera suba una imagen
+        // inapropiada y aparezca de inmediato en el sitio.
         $sql = "SELECT p.*, u.nombre, u.apellidos
                 FROM publicaciones p
                 JOIN usuarios u ON u.id_usuario = p.id_usuario
@@ -29,6 +32,8 @@ class Publicacion
     /** Todas las publicaciones (panel admin). */
     public function listarTodas(): array
     {
+        // Esta versión sin filtro de estado es la que usa el admin para
+        // ver también las pendientes y rechazadas, y poder moderarlas.
         $sql = 'SELECT p.*, u.nombre, u.apellidos
                 FROM publicaciones p
                 JOIN usuarios u ON u.id_usuario = p.id_usuario
@@ -38,15 +43,20 @@ class Publicacion
 
     public function crear(array $datos): bool
     {
-        $sql = 'INSERT INTO publicaciones (id_usuario, titulo, descripcion, imagen, estado)
-                VALUES (:id_usuario, :titulo, :descripcion, :imagen, :estado)';
+        // Toda publicación nueva nace en 'pendiente' salvo que se diga
+        // lo contrario, porque necesita aprobación de un admin antes de
+        // hacerse pública. La calificación es la cantidad de estrellas
+        // (1 a 5) que el usuario le puso a su experiencia de alquiler.
+        $sql = 'INSERT INTO publicaciones (id_usuario, titulo, descripcion, imagen, calificacion, estado)
+                VALUES (:id_usuario, :titulo, :descripcion, :imagen, :calificacion, :estado)';
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
-            ':id_usuario'  => $datos['id_usuario'],
-            ':titulo'      => $datos['titulo'],
-            ':descripcion' => $datos['descripcion'] ?? null,
-            ':imagen'      => $datos['imagen'],
-            ':estado'      => $datos['estado'] ?? 'pendiente',
+            ':id_usuario'   => $datos['id_usuario'],
+            ':titulo'       => $datos['titulo'],
+            ':descripcion'  => $datos['descripcion'] ?? null,
+            ':imagen'       => $datos['imagen'],
+            ':calificacion' => $datos['calificacion'] ?? 5,
+            ':estado'       => $datos['estado'] ?? 'pendiente',
         ]);
     }
 
@@ -59,6 +69,7 @@ class Publicacion
 
     public function cambiarEstado(int $id, string $estado): bool
     {
+        // El admin usa esto para aprobar o rechazar una publicación.
         $stmt = $this->db->prepare('UPDATE publicaciones SET estado = :estado WHERE id_publicacion = :id');
         return $stmt->execute([':estado' => $estado, ':id' => $id]);
     }

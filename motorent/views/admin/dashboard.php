@@ -15,7 +15,7 @@
     <div class="col-md-3">
         <div class="card text-white bg-warning shadow-sm">
             <div class="card-body">
-                <i class="bi bi-scooter fs-2"></i>
+                <span class="fs-2">Motos</span>
                 <h3 class="mt-2"><?= (int) $stats['total_motos'] ?></h3>
                 <p class="mb-0"><?= (int) $stats['motos_disponibles'] ?> disponibles</p>
             </div>
@@ -24,7 +24,7 @@
     <div class="col-md-3">
         <div class="card text-white bg-primary shadow-sm">
             <div class="card-body">
-                <i class="bi bi-calendar-check fs-2"></i>
+                <span class="fs-2">Reservas</span>
                 <h3 class="mt-2"><?= (int) $stats['total_reservas'] ?></h3>
                 <p class="mb-0"><?= (int) $stats['reservas_pendientes'] ?> pendientes</p>
             </div>
